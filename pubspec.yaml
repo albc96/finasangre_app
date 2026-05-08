@@ -1,0 +1,68 @@
+name: finasangre_app
+description: Sistema de Herrajes FINASANGRE conectado a Oracle ORDS
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  http: ^1.2.2
+  provider: ^6.1.2
+  shared_preferences: ^2.3.2
+  local_auth: ^2.3.0
+  google_fonts: ^6.2.1
+  intl: ^0.20.2
+  url_launcher: ^6.3.1
+  fl_chart: ^0.69.0
+  pdf: ^3.11.1
+  printing: ^5.13.4
+  share_plus: ^10.1.4
+  speech_to_text: ^7.0.0
+  flutter_tts: ^4.0.2
+  permission_handler: ^11.3.1
+  sqflite: ^2.4.1
+  path_provider: ^2.1.5
+  path: ^1.9.0
+  connectivity_plus: ^6.1.0
+  image_picker: ^1.1.2
+  cupertino_icons: ^1.0.8
+  flutter_local_notifications: ^17.2.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/images/app_icon.png
+  adaptive_icon_background: "#050B18"
+  adaptive_icon_foreground: assets/images/app_icon.png
+  web:
+    generate: true
+    image_path: assets/images/app_icon.png
+    background_color: "#050B18"
+    theme_color: "#00E5FF"
+  windows:
+    generate: true
+    image_path: assets/images/app_icon.png
+    icon_size: 256
+  macos:
+    generate: true
+    image_path: assets/images/app_icon.png
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/
+    - assets/hero_finasangre.png
+    - assets/images/pdf_hero_finasangre.png
+    - assets/images/
+  
