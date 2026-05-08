@@ -21,30 +21,13 @@ La aplicacion esta pensada para uso diario en terreno y oficina: permite registr
 
 FINASANGRE guarda y consulta informacion en Oracle Cloud usando ORDS.
 
-Endpoints principales:
-
-- `caballos_finasangre`
-- `herrajes_finasangre`
-- `corrales_finasangre`
-- `herradores_finasangre`
-- `preparadores_finasangre`
-- `usuarios_finasangre`
-- `suscripciones_finasangre`
-- `reportes_mensuales_finasangre`
-- `aura_finasangre`
-- `auditoria_finasangre`
-
-La configuracion de ORDS esta en:
-
-```text
-lib/core/config/app_config.dart
-```
+Los detalles internos de conexion y endpoints no se documentan publicamente en este README por seguridad.
 
 ## Requisitos
 
 - Flutter estable instalado.
 - Android Studio o SDK Android para compilar APK.
-- Conexion a internet para sincronizar con Oracle ORDS.
+- Conexion a internet para sincronizar con la nube.
 
 ## Comandos utiles
 
