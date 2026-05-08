@@ -1,13 +1,92 @@
-# FINASANGRE Flutter
+# FINASANGRE
 
-1. Crea proyecto Flutter: `flutter create finasangre_app`
-2. Copia este `lib`, `assets` y `pubspec.yaml` encima del proyecto.
-3. Ejecuta `flutter pub get`.
-4. Revisa en `lib/main.dart` la constante `ordsBaseUrl`.
-5. Ejecuta `flutter run`.
+FINASANGRE es una aplicacion Flutter para administrar el control de herrajes de caballos, corrales, herradores, preparadores, usuarios y reportes operativos.
 
-Login de prueba según inserts SQL:
-- Email: admin@finasangre.cl
-- Password: 123456
+La aplicacion esta pensada para uso diario en terreno y oficina: permite registrar informacion, mantener historial, revisar alertas, generar reportes y sincronizar datos con Oracle Cloud mediante ORDS.
 
-La app consume ORDS directo usando endpoints: caballos_finasangre, herrajes_finasangre, corrales_finasangre, herradores_finasangre, usuarios_finasangre y reportes_mensuales_finasangre.
+## Funciones principales
+
+- Login de usuarios con roles y control de acceso.
+- Dashboard operativo con resumen de caballos, herrajes, corrales, herradores y suscripciones.
+- CRUD de caballos, herrajes, corrales, herradores, preparadores y usuarios.
+- Registro de herrajes con caballo, herrador, corral, fecha, hora, tipo y observaciones.
+- Alertas de caballos con herrajes pendientes.
+- Reportes mensuales y detalle de reportes.
+- Exportacion y envio de reportes por PDF, WhatsApp y correo.
+- Asistente AURA para consultas rapidas dentro de la aplicacion.
+- Cache local y sincronizacion de datos pendientes cuando vuelve la conexion.
+- Soporte Android, Web, Windows, Linux, macOS e iOS desde el mismo proyecto Flutter.
+
+## Conexion en la nube
+
+FINASANGRE guarda y consulta informacion en Oracle Cloud usando ORDS.
+
+Endpoints principales:
+
+- `caballos_finasangre`
+- `herrajes_finasangre`
+- `corrales_finasangre`
+- `herradores_finasangre`
+- `preparadores_finasangre`
+- `usuarios_finasangre`
+- `suscripciones_finasangre`
+- `reportes_mensuales_finasangre`
+- `aura_finasangre`
+- `auditoria_finasangre`
+
+La configuracion de ORDS esta en:
+
+```text
+lib/core/config/app_config.dart
+```
+
+## Requisitos
+
+- Flutter estable instalado.
+- Android Studio o SDK Android para compilar APK.
+- Conexion a internet para sincronizar con Oracle ORDS.
+
+## Comandos utiles
+
+Instalar dependencias:
+
+```bash
+flutter pub get
+```
+
+Revisar errores:
+
+```bash
+flutter analyze
+```
+
+Ejecutar pruebas:
+
+```bash
+flutter test
+```
+
+Ejecutar la aplicacion:
+
+```bash
+flutter run
+```
+
+Generar APK Android:
+
+```bash
+flutter build apk --release
+```
+
+El APK queda en:
+
+```text
+build/app/outputs/flutter-apk/app-release.apk
+```
+
+## Estado actual
+
+- Analisis Flutter sin errores.
+- Tests automatizados pasando.
+- APK release generado correctamente.
+- Repositorio preparado para control de versiones en GitHub.
