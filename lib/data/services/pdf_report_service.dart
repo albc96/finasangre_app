@@ -31,6 +31,18 @@ class HerrajeView {
   String get observaciones => herraje.observaciones;
 }
 
+class HerrajeReportItem extends HerrajeView {
+  const HerrajeReportItem({
+    required super.herraje,
+    required super.caballo,
+    required super.corral,
+    required super.preparador,
+    required super.herrador,
+  });
+
+  int get idHerraje => herraje.idHerraje;
+}
+
 class PdfReportService {
   static const _cyan = PdfColor.fromInt(0xFF00E5FF);
   static const _pink = PdfColor.fromInt(0xFFFF2D95);
@@ -61,8 +73,7 @@ class PdfReportService {
     final pw.MemoryImage heroImage = pw.MemoryImage(heroBytes);
     final periodStart = DateTime(year, month);
     final periodEnd = DateTime(year, month + 1, 0);
-    final rows = herrajes.toList()
-      ..sort((a, b) => a.fecha.compareTo(b.fecha));
+    final rows = herrajes.toList()..sort(_compareHerrajes);
 
     final completos = _countTipo(rows, 'COMPLETO');
     final manos = _countTipo(rows, 'MANOS');
@@ -88,7 +99,7 @@ class PdfReportService {
           pw.SizedBox(height: 14),
           _sectionTitle('DETALLE DE HERRAJES DEL PERIODO'),
           pw.SizedBox(height: 8),
-          _table(rows),
+          ..._detailSections(rows),
           pw.SizedBox(height: 14),
           _summaryCards(
             completos: completos,
@@ -273,20 +284,19 @@ class PdfReportService {
   }
 
   pw.Widget _table(List<HerrajeView> rows) {
-    final headers = ['#', 'Caballo', 'Corral', 'Preparador', 'Herrador', 'Tipo', 'Fecha', 'Hora'];
+    final headers = ['#', 'Fecha', 'Hora', 'Caballo', 'Corral', 'Tipo', 'Obs.'];
     return pw.TableHelper.fromTextArray(
       headers: headers,
       data: [
         for (var i = 0; i < rows.length; i++)
           [
             '${i + 1}',
-            _fit(rows[i].caballo),
-            _fit(rows[i].corral),
-            _fit(rows[i].preparador),
-            _fit(rows[i].herrador),
-            _fit(rows[i].tipo),
             DateFormat('dd/MM/yyyy').format(rows[i].fecha),
             rows[i].hora,
+            _fit(rows[i].caballo),
+            _fit(rows[i].corral),
+            _fit(rows[i].tipo),
+            _fit(rows[i].observaciones),
           ],
       ],
       border: pw.TableBorder.all(color: PdfColor.fromInt(0x5530DFFF), width: .45),
@@ -307,14 +317,99 @@ class PdfReportService {
       cellPadding: const pw.EdgeInsets.symmetric(horizontal: 4, vertical: 6),
       columnWidths: {
         0: const pw.FixedColumnWidth(18),
-        1: const pw.FlexColumnWidth(1.25),
-        2: const pw.FlexColumnWidth(1.1),
+        1: const pw.FixedColumnWidth(50),
+        2: const pw.FixedColumnWidth(34),
         3: const pw.FlexColumnWidth(1.35),
-        4: const pw.FlexColumnWidth(1.25),
-        5: const pw.FlexColumnWidth(.9),
-        6: const pw.FixedColumnWidth(50),
-        7: const pw.FixedColumnWidth(34),
+        4: const pw.FlexColumnWidth(1.15),
+        5: const pw.FlexColumnWidth(.85),
+        6: const pw.FlexColumnWidth(1.25),
       },
+    );
+  }
+
+  List<pw.Widget> _detailSections(List<HerrajeView> rows) {
+    if (rows.isEmpty) {
+      return [
+        pw.Container(
+          width: double.infinity,
+          padding: const pw.EdgeInsets.all(12),
+          decoration: pw.BoxDecoration(
+            color: _panel,
+            borderRadius: pw.BorderRadius.circular(8),
+            border: pw.Border.all(color: _cyan, width: .7),
+          ),
+          child: pw.Text(
+            'Sin herrajes registrados para este periodo.',
+            style: const pw.TextStyle(color: _white, fontSize: 9),
+          ),
+        ),
+      ];
+    }
+
+    final herradores = <String, List<HerrajeView>>{};
+    for (final row in rows) {
+      final key = _groupKey(row.herrador, 'Herrador sin nombre');
+      herradores.putIfAbsent(key, () => []).add(row);
+    }
+
+    if (herradores.length == 1) {
+      return _preparadorSections(rows);
+    }
+
+    final widgets = <pw.Widget>[];
+    final herradoresOrdenados = herradores.keys.toList()..sort();
+    for (final herrador in herradoresOrdenados) {
+      final items = herradores[herrador]!..sort(_compareHerrajes);
+      widgets.add(_groupHeader('HERRADOR: $herrador', items));
+      widgets.add(pw.SizedBox(height: 8));
+      widgets.addAll(_preparadorSections(items, nested: true));
+      widgets.add(pw.SizedBox(height: 6));
+    }
+    return widgets;
+  }
+
+  List<pw.Widget> _preparadorSections(
+    List<HerrajeView> rows, {
+    bool nested = false,
+  }) {
+    final porPreparador = <String, List<HerrajeView>>{};
+    for (final row in rows) {
+      final key = _groupKey(row.preparador, 'Sin preparador');
+      porPreparador.putIfAbsent(key, () => []).add(row);
+    }
+
+    final widgets = <pw.Widget>[];
+    final preparadoresOrdenados = porPreparador.keys.toList()..sort();
+    for (final preparador in preparadoresOrdenados) {
+      final items = porPreparador[preparador]!..sort(_compareHerrajes);
+      widgets.add(_groupHeader('PREPARADOR: $preparador', items));
+      widgets.add(pw.SizedBox(height: 6));
+      widgets.add(_table(items));
+      widgets.add(pw.SizedBox(height: nested ? 12 : 14));
+    }
+    return widgets;
+  }
+
+  pw.Widget _groupHeader(String title, List<HerrajeView> rows) {
+    final completos = _countTipo(rows, 'COMPLETO');
+    final manos = _countTipo(rows, 'MANOS');
+    final patas = _countTipo(rows, 'PATAS');
+    return pw.Container(
+      width: double.infinity,
+      padding: const pw.EdgeInsets.all(8),
+      decoration: pw.BoxDecoration(
+        color: _panel,
+        borderRadius: pw.BorderRadius.circular(8),
+        border: pw.Border.all(color: _cyan, width: .7),
+      ),
+      child: pw.Text(
+        '$title  -  Total: ${rows.length}  -  Completos: $completos  -  Manos: $manos  -  Patas: $patas',
+        style: pw.TextStyle(
+          color: _cyan,
+          fontSize: 9,
+          fontWeight: pw.FontWeight.bold,
+        ),
+      ),
     );
   }
 
@@ -457,5 +552,18 @@ class PdfReportService {
   String _fit(String value) {
     final clean = value.trim().isEmpty ? '-' : value.trim();
     return clean.length <= 24 ? clean : '${clean.substring(0, 21)}...';
+  }
+
+  String _groupKey(String value, String fallback) {
+    final clean = value.trim();
+    return clean.isEmpty ? fallback : clean;
+  }
+
+  int _compareHerrajes(HerrajeView a, HerrajeView b) {
+    final byDate = a.fecha.compareTo(b.fecha);
+    if (byDate != 0) return byDate;
+    final byTime = a.hora.compareTo(b.hora);
+    if (byTime != 0) return byTime;
+    return a.herraje.idHerraje.compareTo(b.herraje.idHerraje);
   }
 }
