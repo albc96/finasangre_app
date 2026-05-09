@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
+import 'package:video_player/video_player.dart';
 
 import '../../providers/auth_provider.dart';
 import '../../providers/aura_provider.dart';
@@ -218,7 +219,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             if (dashboard.loading)
               const LinearProgressIndicator(color: AppColors.cyan),
-            DashboardHeader(userName: auth.user?.nombreCompleto ?? ''),
+            DashboardVideoHeader(userName: auth.user?.nombreCompleto ?? ''),
             const SizedBox(height: 20),
             DashboardStats(dashboard: dashboard, open: _open),
             const SizedBox(height: 20),
@@ -666,6 +667,147 @@ class DashboardFilters extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class DashboardVideoHeader extends StatefulWidget {
+  const DashboardVideoHeader({super.key, required this.userName});
+
+  final String userName;
+
+  @override
+  State<DashboardVideoHeader> createState() => _DashboardVideoHeaderState();
+}
+
+class _DashboardVideoHeaderState extends State<DashboardVideoHeader> {
+  late final VideoPlayerController _controller;
+  bool _ready = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.asset(
+      'assets/videos/dashboard_finasangre.mp4',
+      videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
+    );
+    _controller
+      ..setLooping(true)
+      ..setVolume(0);
+    _controller.initialize().then((_) {
+      if (!mounted) return;
+      setState(() => _ready = true);
+      _controller.play();
+    }).catchError((_) {
+      if (mounted) setState(() => _ready = false);
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    final isMobile = width < 520;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(isMobile ? 0 : 16, 12, isMobile ? 0 : 16, 4),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: SizedBox(
+          height: isMobile ? 250 : 220,
+          width: double.infinity,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (_ready)
+                FittedBox(
+                  fit: BoxFit.cover,
+                  child: SizedBox(
+                    width: _controller.value.size.width,
+                    height: _controller.value.size.height,
+                    child: VideoPlayer(_controller),
+                  ),
+                )
+              else
+                Image.asset('assets/images/aura_horse.png', fit: BoxFit.cover),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      const Color(0xFF050B18).withValues(alpha: .92),
+                      const Color(0xFF050B18).withValues(alpha: .70),
+                      const Color(0xFF050B18).withValues(alpha: .28),
+                    ],
+                  ),
+                  border: Border.all(
+                    color: AppColors.cyan.withValues(alpha: .28),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(isMobile ? 18 : 24),
+                child: Align(
+                  alignment:
+                      isMobile ? Alignment.center : Alignment.centerLeft,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 440),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: isMobile
+                          ? CrossAxisAlignment.center
+                          : CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.workspace_premium,
+                          color: AppColors.gold,
+                          size: 48,
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          'FINASANGRE',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 34,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 3,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Valparaiso Sporting Club',
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          widget.userName.isEmpty
+                              ? 'Dashboard operativo'
+                              : isMobile
+                                  ? 'Bienvenido\n${widget.userName}'
+                                  : 'Bienvenido ${widget.userName}',
+                          textAlign:
+                              isMobile ? TextAlign.center : TextAlign.start,
+                          style: TextStyle(
+                            fontSize: isMobile ? 22 : 20,
+                            height: 1.15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
